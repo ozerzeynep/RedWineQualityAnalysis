@@ -11,8 +11,17 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import time
 import warnings
 warnings.filterwarnings("ignore")
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score, log_loss
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 
 dfC = pd.read_csv("winequality-red.csv")
 
@@ -31,6 +40,8 @@ df.describe().T
 df.isnull().sum()
 
 df.median()
+
+df['quality'].value_counts()
 
 plt.figure(figsize= (17,5))
 plt.subplot(1,3,1)
@@ -89,5 +100,165 @@ plt.figure(figsize= (17,6))
 sns.scatterplot(x= "quality", y= "residual sugar", data= df)
 plt.show()
 
+y= df[["quality"]]
+x = df.drop("quality", axis= 1)
 
+x_train, x_test, y_train, y_test= train_test_split(x,y, train_size=0.70, random_state=21)
+
+scaler = StandardScaler()
+
+x_train_scaler = scaler.fit_transform(x_train)
+x_test_scaler = scaler.transform(x_test)
+
+start_train_time = time.time()
+rm = RandomForestClassifier(n_estimators=100, random_state=42)
+model = rm.fit(x_train_scaler, y_train)
+end_train_time = time.time()
+total_train_time = end_train_time - start_train_time
+
+y_train_pred = rm.predict(x_train_scaler)
+train_accuracy = accuracy_score(y_train, y_train_pred)
+train_precision = precision_score(y_train, y_train_pred,average='weighted')
+train_recall = recall_score(y_train, y_train_pred, average='weighted')
+train_f1 = f1_score(y_train, y_train_pred, average='weighted')
+train_conf_matrix = confusion_matrix(y_train, y_train_pred)
+
+y_train_pred_proba = rm.predict_proba(x_train_scaler)
+train_roc_auc = roc_auc_score(y_train, y_train_pred_proba, multi_class='ovr', average='weighted')
+train_log_loss = log_loss(y_train, y_train_pred_proba)
+
+start_test_time = time.time()
+y_test_pred = rm.predict(x_test_scaler)
+end_test_time = time.time()
+total_test_time = end_test_time - start_test_time
+
+test_accuracy = accuracy_score(y_test, y_test_pred)
+test_precision = precision_score(y_test, y_test_pred, average='weighted')
+test_recall = recall_score(y_test, y_test_pred, average='weighted')
+test_f1 = f1_score(y_test, y_test_pred, average='weighted')
+test_conf_matrix = confusion_matrix(y_test, y_test_pred)
+
+y_test_pred_proba = rm.predict_proba(x_test_scaler)
+test_roc_auc = roc_auc_score(y_test, y_test_pred_proba, multi_class='ovr', average='weighted')
+test_log_loss = log_loss(y_test, y_test_pred_proba)
+
+
+print(f"Train Time: {total_train_time}")
+print(f"Train Accuracy: {train_accuracy}")
+print(f"Train Precision: {train_precision}")
+print(f"Train Recall: {train_recall}")
+print(f"Train F1: {train_f1}")
+print(f"Train Conf Matrix: {train_conf_matrix}")
+print(f"Train Roc AUC: {train_roc_auc}")
+print(f"Train Logloss: {train_log_loss}")
+print("----------------------------------------------")
+print(f"Test Time: {total_test_time}")
+print(f"Test Accuracy: {test_accuracy}")
+print(f"Test Precision: {test_precision}")
+print(f"Test Recall: {test_recall}")
+print(f"Test F1: {test_f1}")
+print(f"Test Conf Matrix: {test_conf_matrix}")
+print(f"Test Roc AUC: {test_roc_auc}")
+print(f"Test Logloss: {test_log_loss}")
+
+start_train_time = time.time()
+dc = DecisionTreeClassifier(max_depth=15, min_samples_split=2, min_samples_leaf=2)
+model2 = dc.fit(x_train_scaler,y_train)
+end_train_time = time.time()
+total_train_time = end_train_time - start_train_time
+
+y_train_pred = dc.predict(x_train_scaler)
+train_accuracy = accuracy_score(y_train, y_train_pred)
+train_precision = precision_score(y_train, y_train_pred,average='weighted')
+train_recall = recall_score(y_train, y_train_pred, average='weighted')
+train_f1 = f1_score(y_train, y_train_pred, average='weighted')
+train_conf_matrix = confusion_matrix(y_train, y_train_pred)
+
+y_train_pred_proba = dc.predict_proba(x_train_scaler)
+train_roc_auc = roc_auc_score(y_train, y_train_pred_proba, multi_class='ovr', average='weighted')
+train_log_loss = log_loss(y_train, y_train_pred_proba)
+
+start_test_time = time.time()
+y_test_pred = dc.predict(x_test_scaler)
+end_test_time = time.time()
+total_test_time = end_test_time - start_test_time
+
+test_accuracy = accuracy_score(y_test, y_test_pred)
+test_precision = precision_score(y_test, y_test_pred, average='weighted')
+test_recall = recall_score(y_test, y_test_pred, average='weighted')
+test_f1 = f1_score(y_test, y_test_pred, average='weighted')
+test_conf_matrix = confusion_matrix(y_test, y_test_pred)
+
+
+y_test_pred_proba = dc.predict_proba(x_test_scaler)
+test_roc_auc = roc_auc_score(y_test, y_test_pred_proba, multi_class='ovr', average='weighted')
+test_log_loss = log_loss(y_test, y_test_pred_proba)
+
+print(f"Train Time: {total_train_time}")
+print(f"Train Accuracy: {train_accuracy}")
+print(f"Train Precision: {train_precision}")
+print(f"Train Recall: {train_recall}")
+print(f"Train F1: {train_f1}")
+print(f"Train Conf Matrix: {train_conf_matrix}")
+print(f"Train Roc AUC: {train_roc_auc}")
+print(f"Train Logloss: {train_log_loss}")
+print("----------------------------------------------")
+print(f"Test Time: {total_test_time}")
+print(f"Test Accuracy: {test_accuracy}")
+print(f"Test Precision: {test_precision}")
+print(f"Test Recall: {test_recall}")
+print(f"Test F1: {test_f1}")
+print(f"Test Conf Matrix: {test_conf_matrix}")
+print(f"Test Roc AUC: {test_roc_auc}")
+print(f"Test Logloss: {test_log_loss}")
+
+start_train_time = time.time()
+lg = LogisticRegression()
+model3 = lg.fit(x_train_scaler, y_train)
+end_train_time = time.time()
+total_train_time = end_train_time - start_train_time
+
+y_train_pred = lg.predict(x_train_scaler)
+train_accuracy = accuracy_score(y_train, y_train_pred)
+train_precision = precision_score(y_train, y_train_pred,average='weighted')
+train_recall = recall_score(y_train, y_train_pred, average='weighted')
+train_f1 = f1_score(y_train, y_train_pred, average='weighted')
+train_conf_matrix = confusion_matrix(y_train, y_train_pred)
+
+y_train_pred_proba = lg.predict_proba(x_train_scaler)
+train_roc_auc = roc_auc_score(y_train, y_train_pred_proba, multi_class='ovr', average='weighted')
+train_log_loss = log_loss(y_train, y_train_pred_proba)
+
+start_test_time = time.time()
+y_test_pred = lg.predict(x_test_scaler)
+end_test_time = time.time()
+total_test_time = end_test_time - start_test_time
+
+test_accuracy = accuracy_score(y_test, y_test_pred)
+test_precision = precision_score(y_test, y_test_pred, average='weighted')
+test_recall = recall_score(y_test, y_test_pred, average='weighted')
+test_f1 = f1_score(y_test, y_test_pred, average='weighted')
+test_conf_matrix = confusion_matrix(y_test, y_test_pred)
+
+y_test_pred_proba = lg.predict_proba(x_test_scaler)
+test_roc_auc = roc_auc_score(y_test, y_test_pred_proba, multi_class='ovr', average='weighted')
+test_log_loss = log_loss(y_test, y_test_pred_proba)
+
+print(f"Train Time: {total_train_time}")
+print(f"Train Accuracy: {train_accuracy}")
+print(f"Train Precision: {train_precision}")
+print(f"Train Recall: {train_recall}")
+print(f"Train F1: {train_f1}")
+print(f"Train Conf Matrix: {train_conf_matrix}")
+print(f"Train Roc AUC: {train_roc_auc}")
+print(f"Train Logloss: {train_log_loss}")
+print("----------------------------------------------")
+print(f"Test Time: {total_test_time}")
+print(f"Test Accuracy: {test_accuracy}")
+print(f"Test Precision: {test_precision}")
+print(f"Test Recall: {test_recall}")
+print(f"Test F1: {test_f1}")
+print(f"Test Conf Matrix: {test_conf_matrix}")
+print(f"Test Roc AUC: {test_roc_auc}")
+print(f"Test Logloss: {test_log_loss}")
 
